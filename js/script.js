@@ -5,8 +5,8 @@ const data = {
 }
 
 const dataDrillValue = {
-    fuelValue: 0,
-    sparePartValue: 0,
+    fuelValue: 20,
+    oilValue: 5,
 }
 
 const dataHouseValue = {
@@ -23,11 +23,11 @@ const experienceValue = document.querySelector(".experience__value")
 // Бур
 // Узлы со значениями панели буровой
 const fuelValue = document.querySelector(".fuel__value")
-const sparePartValue = document.querySelector(".spare-part__value")
+const oilValue = document.querySelector(".oil__value")
 
 // Узлы кнопок поплнения ресурсов буровой
 const fuelFill = document.querySelector(".fuel__fill")
-const sparePartFill = document.querySelector(".spare-part__fill")
+const oilFill = document.querySelector(".oil__fill")
 
 // Узел кнопки запуска буровой
 const drillRun = document.querySelector(".drill__run")
@@ -48,7 +48,7 @@ function renderValueMainPanel(data) {
 // Функция рендера значений панели буровой
 function renderValueDrillPanel(dataDrillValue) {
     fuelValue.textContent = dataDrillValue.fuelValue
-    sparePartValue.textContent = dataDrillValue.sparePartValue
+    oilValue.textContent = dataDrillValue.oilValue
 }
 
 // Функция рендера значений панелей дома
@@ -79,35 +79,57 @@ function fellFuelValueDrill(data, dataDrillValue) {
     renderValueMainPanel(data)
 }
 
-// Функция пополнения запчастей буровой
-function fellSparePartValueDrill(data, dataDrillValue) {
-    const value = dataDrillValue.sparePartValue
+// Функция пополнения масла буровой
+function fellOilValueDrill(data, dataDrillValue) {
+    const value = dataDrillValue.oilValue
     const difference = 50 - value
 
-    dataDrillValue.sparePartValue = 50
+    dataDrillValue.oilValue = 50
 
-    sparePartValue.textContent = dataDrillValue.sparePartValue
+    oilValue.textContent = dataDrillValue.oilValue
 
     data.resorcesValue -= difference 
 
     renderValueMainPanel(data)
 }
 
-// Функция работы буровой
-function runDrill(dataDrillValue, dataHouseValue) {
-    setInterval(() => {
+// Функция расходования топлива
+function consumptionFuel(dataDrillValue) {
+    const intervalConsumptionFuel = setInterval(() => {
         dataDrillValue.fuelValue -= 4
-        dataDrillValue.sparePartValue -= 1
-        dataHouseValue.storageValue += 1
 
         renderValueDrillPanel(dataDrillValue)
-        renderValueHousePanels(dataHouseValue)
+
+        if (dataDrillValue.fuelValue == 0) {
+            clearInterval(intervalConsumptionFuel)
+            console.log("Закончилось топливо!")
+        }
     },1000)
+}
+
+// Функция расходования масла
+function consumptionOil(dataDrillValue) {
+    const intervalConsumptionOil = setInterval(() => {
+        dataDrillValue.oilValue -= 1
+
+        renderValueDrillPanel(dataDrillValue)
+
+        if (dataDrillValue.oilValue == 0) {
+            clearInterval(intervalConsumptionOil)
+            console.log("Закончилось масло!")
+        }
+    },1000)
+}
+
+// Функция работы буровой
+function runDrill(dataDrillValue, dataHouseValue) {
+    consumptionFuel(dataDrillValue)
+    consumptionOil(dataDrillValue)
 }
 
 // Обработчики пополнения ресурсов буровой
 fuelFill.addEventListener("click", () => fellFuelValueDrill(data, dataDrillValue))
-sparePartFill.addEventListener("click", () => fellSparePartValueDrill(data, dataDrillValue))
+oilFill.addEventListener("click", () => fellOilValueDrill(data, dataDrillValue))
 
 // Обработчик первого рендера
 document.addEventListener("DOMContentLoaded", () => renderFullValue(data, dataDrillValue, dataHouseValue))
