@@ -38,6 +38,9 @@ const waterValue = document.querySelector(".water__value")
 const foodValue = document.querySelector(".food__value")
 const storageValue = document.querySelector(".storage__value")
 
+
+
+// Рендеры
 // Функция рендера значений основной панели
 function renderValueMainPanel(data) {
     moneyValue.textContent = data.moneyValue
@@ -46,7 +49,7 @@ function renderValueMainPanel(data) {
 }
 
 // Функция рендера значений панели буровой
-function renderValueDrillPanel(dataDrillValue) {
+function renderValueDrillPanel() {
     fuelValue.textContent = dataDrillValue.fuelValue
     oilValue.textContent = dataDrillValue.oilValue
 }
@@ -59,7 +62,7 @@ function renderValueHousePanels(dataHouseValue) {
 }
 
 // Функция рендера всех значений
-function renderFullValue(data, dataDrillValue, dataHouseValue) {
+function renderAllValue(data, dataDrillValue, dataHouseValue) {
     renderValueMainPanel(data)
     renderValueDrillPanel(dataDrillValue)
     renderValueHousePanels(dataHouseValue)
@@ -96,7 +99,9 @@ function fellOilValueDrill(data, dataDrillValue) {
 // Функция расходования топлива
 function consumptionFuel(dataDrillValue) {
     const intervalConsumptionFuel = setInterval(() => {
-        dataDrillValue.fuelValue -= 4
+        dataDrillValue.fuelValue -= 1
+
+        getOre(dataHouseValue)
 
         renderValueDrillPanel(dataDrillValue)
 
@@ -118,21 +123,51 @@ function consumptionOil(dataDrillValue) {
             clearInterval(intervalConsumptionOil)
             console.log("Закончилось масло!")
         }
-    },1000)
+    },5000)
+}
+
+// Общая функция расхода каких-либо ресурсов
+function consumption(store, property, value, render) {
+    store[property] -= value
+    render()
 }
 
 // Функция работы буровой
-function runDrill(dataDrillValue, dataHouseValue) {
-    consumptionFuel(dataDrillValue)
-    consumptionOil(dataDrillValue)
+function runDrill() {
+    const intervalConsumptionFuel = setInterval(() => {
+        consumption(dataDrillValue, "fuelValue", 1, () => renderValueDrillPanel())
+
+        if (dataDrillValue.fuelValue == 0) {
+            clearInterval(intervalConsumptionFuel)
+            console.log("Закончилось топливо!")
+        }
+    },1000)
+    const intervalConsumptionOil = setInterval(() => {
+        consumption(dataDrillValue, "oilValue", 1, () => renderValueDrillPanel())
+
+        if (dataDrillValue.oilValue == 0) {
+            clearInterval(intervalConsumptionOil)
+            console.log("Закончилось масло!")
+        }
+    },5000)
 }
+
+
+
+// Функция попадания руды в хранилище
+function getOre(dataHouseValue) {
+    dataHouseValue.storageValue += 1
+
+    renderValueHousePanels(dataHouseValue)
+}
+
 
 // Обработчики пополнения ресурсов буровой
 fuelFill.addEventListener("click", () => fellFuelValueDrill(data, dataDrillValue))
 oilFill.addEventListener("click", () => fellOilValueDrill(data, dataDrillValue))
 
 // Обработчик первого рендера
-document.addEventListener("DOMContentLoaded", () => renderFullValue(data, dataDrillValue, dataHouseValue))
+document.addEventListener("DOMContentLoaded", () => renderAllValue(data, dataDrillValue, dataHouseValue))
 
 // Обработчик запуска буровой
 drillRun.addEventListener("click", () => runDrill(dataDrillValue, dataHouseValue))
